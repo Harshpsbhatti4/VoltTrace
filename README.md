@@ -1,15 +1,15 @@
-# VoltTrace ⚡
+# VoltTrace
 > **Edge-Powered Smart Plug Platform with Embedded Physical AI**  
 > *Developed for the Arduino Physical AI Challenge India 2026*
 
 ---
 
-## 📌 Abstract
+## Abstract
 **VoltTrace** is an intelligent, edge-controlled smart energy monitoring and safety plug platform. By deploying physical AI directly onto the microcontroller, VoltTrace samples and processes electrical signatures (voltage, current, power factor, and harmonic distortion) entirely on-device. The system provides real-time load characterization, early fault prediction, anomaly detection, and autonomous hardware protection without requiring continuous cloud connectivity.
 
 ---
 
-## ✨ Key Features
+## Key Features
 * **Edge Physical AI Inference:** Real-time on-device classification and anomaly detection using TinyML / TensorFlow Lite Micro.
 * **Autonomous Circuit Protection:** Sub-cycle fault detection and automatic relay cut-off for over-current, arc signatures, and voltage surges.
 * **Zero-Latency & High Privacy:** Deterministic edge processing ensures electrical data is processed locally without external dependency.
@@ -17,7 +17,7 @@
 
 ---
 
-## 🏗️ Repository Architecture
+## Repository Architecture
 
 ```text
 ├── docs/                 # Documentation, schematic diagrams, and project report PDF
