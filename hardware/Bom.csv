@@ -1,9 +1,9 @@
-Item #,Component Description,Part Number / Specification,Designator,Quantity,Estimated Cost (INR),Function
-1,Edge AI Processing Board,Arduino UNO Q,U1,1,6749,DSP Sampling and Physical AI Inference
-2,AC Precision Voltage Sensor,ZMPT101B Active Transformer Module,U2,1,250,Isolated AC Voltage Waveform Sensing
-3,AC Current Sensor (0-30A),SCT-013-000 Non-Invasive Split-Core CT,U3,1,450,Isolated AC Load Current Sensing
-4,Actuator Control / Relay,5V Fast-Switching Relay / SSR (16A 250VAC),RL1,1,120,Autonomous Safety Load Cut-off
-5,Status Indicators (Green/Red),3mm/5mm Through-Hole LEDs,D1-D2,2,10,Real-time System & Fault Status Indication
-6,Analog Conditioning & Bias,10k Resistors & 100nF/10uF Capacitors,R1-R4/C1-C2,6,30,Analog Filtering and DC Midpoint Bias
-7,Prototyping Testbed & Interconnects,Breadboard & Dupont Jumper Wires,TB1,1,180,Benchtop Prototyping and Signal Routing
-8,Isolated DC Power Supply,5V 2A Regulated Power Supply,PS1,1,200,Clean Low-Noise DC Power Source
+Item #,Component Description,/ Specification,Designator,Quantity,Estimated Cost (INR),Function
+Edge AI Processing Board,Arduino UNO Q,U1,1,6749,DSP Sampling and Physical AI Inference
+AC Precision Voltage Sensor,ZMPT101B Active Transformer Module,U2,1,250,Isolated AC Voltage Waveform Sensing
+AC Current Sensor (0-30A),SCT-013-000 Non-Invasive Split-Core CT,U3,1,450,Isolated AC Load Current Sensing
+Actuator Control / Relay,5V Fast-Switching Relay / SSR (16A 250VAC),RL1,1,120,Autonomous Safety Load Cut-off
+Status Indicators (Green/Red),3mm/5mm Through-Hole LEDs,D1-D2,2,10,Real-time System & Fault Status Indication
+Analog Conditioning & Bias,10k Resistors & 100nF/10uF Capacitors,R1-R4/C1-C2,6,30,Analog Filtering and DC Midpoint Bias
+Prototyping Testbed & Interconnects,Breadboard & Dupont Jumper Wires,TB1,1,180,Benchtop Prototyping and Signal Routing
+Isolated DC Power Supply,5V 2A Regulated Power Supply,PS1,1,200,Clean Low-Noise DC Power Source
