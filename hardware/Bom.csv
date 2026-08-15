@@ -1,5 +1,5 @@
 Item #,Component Description,Part Number / Specification,Designator,Quantity,Estimated Cost (INR)
-1,Edge AI Processing Board,Arduino UNO Q,U1,1,3500
+1,Edge AI Processing Board,Arduino UNO Q,U1,1,6749
 2,AC Current Sensor (0-20A),SCT-013-000 / Hall Sensor,U2,1,450
 3,AC Precision Voltage Sensor Module,ZMPT101B Module,U3,1,250
 4,Isolated AC-DC Power Supply Module,Hi-Link 5V/1A (HLK-PM01),PS1,1,300
