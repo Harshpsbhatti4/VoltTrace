@@ -1,4 +1,4 @@
-Item #Component Description,/ Specification,Designator,Quantity,Estimated Cost (INR),Function
+Component Description,Specification,Designator,Quantity,Estimated Cost (INR),Function
 Edge AI Processing Board,Arduino UNO Q,U1,1,6749,DSP Sampling and Physical AI Inference
 AC Precision Voltage Sensor,ZMPT101B Active Transformer Module,U2,1,250,Isolated AC Voltage Waveform Sensing
 AC Current Sensor (0-30A),SCT-013-000 Non-Invasive Split-Core CT,U3,1,450,Isolated AC Load Current Sensing
