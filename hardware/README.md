@@ -1,23 +1,34 @@
-# VoltTrace Hardware Design & Pinout
+# VoltTrace Hardware Design & Pinout Specifications
 
-This directory contains the schematic designs, hardware Bill of Materials (BOM), and circuit interconnect specifications for the **VoltTrace** smart plug platform.
-
----
-
-## Pin Mapping & Interfacing
-
-| Subsystem | Sensor / Module | Arduino Pin / Interface | Signal Type |
-| :--- | :--- | :--- | :--- |
-| **Voltage Sensing** | ZMPT101B Module | `A0` | Analog (AC Sinusoid 0-5V biased) |
-| **Current Sensing** | SCT-013-000 (with Burden) | `A1` | Analog (AC Sinusoid 0-5V biased) |
-| **Actuator Control** | Fast-Switching Relay / SSR | `D7` | Digital Output (Active HIGH) |
-| **Status Indicator** | Normal Operation (Green LED) | `D8` | Digital Output |
-| **Status Indicator** | Fault / Cut-Off (Red LED) | `D9` | Digital Output |
-| **Serial Telemetry** | Edge Logging / Debug | `TX / RX (UART)` | 115200 Baud |
+This directory contains the electrical interface details, pin connections, safety isolation design, and hardware setup instructions for the **VoltTrace Edge-AI Smart Plug Platform**.
 
 ---
 
-## Electrical Safety & Isolation
-* **Galvanic Isolation:** Voltage and current sensing channels are galvanically isolated via on-board transformers (ZMPT101B and Current Transformer) to protect low-voltage processing circuitry.
-* **Control Isolation:** Relay triggers are optically coupled via optocouplers to prevent back-EMF and high-voltage transients from reaching the Arduino core.
-* **Enclosure:** All high-voltage AC mains lines (220V–240V) must be housed inside an insulated, flame-retardant enclosure.
+## Hardware Architecture Overview
+
+VoltTrace interfaces directly with mains AC voltage ($230\text{V RMS}, 50\text{Hz}$) to sample analog voltage and current signals safely using galvanic isolation.
+
+```text
+       +-------------------------------------------------------------+
+       |                     AC MAINS (230V / 50Hz)                  |
+       +------------------------------+------------------------------+
+                                      |
+                      +---------------+---------------+
+                      |                               |
+              [ ZMPT101B Voltage ]            [ SCT-013 Current ]
+              [   Transformer    ]            [   Transformer   ]
+                      |                               |
+                      +---------------+---------------+
+                                      |
+                              (Analog Conditioning)
+                                      |
+                       +--------------+--------------+
+                       |   Arduino UNO Q Board       |
+                       |  - Pin A2: Voltage Signal   |
+                       |  - Pin A1: Current Signal   |
+                       |  - Pin D7: Relay Control    |
+                       +--------------+--------------+
+                                      |
+                              [ 5V Relay Switch ]
+                                      |
+                           [ Universal AC Socket ]
