@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VoltTrace | Edge-AI Smart Diagnostics</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg-canvas: #f1f5f9; --card-bg: #ffffff; --border-subtle: #cbd5e1;
+      --accent-indigo: #4f46e5; --accent-teal: #0d9488; --accent-amber: #d97706;
+      --text-primary: #0f172a; --text-muted: #64748b;
+      --status-green: #10b981; --status-green-bg: #ecfdf5;
+      --status-yellow: #f59e0b; --status-red: #ef4444; --status-red-bg: #fef2f2;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+    body { background-color: var(--bg-canvas); color: var(--text-primary); min-height: 100vh; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 12px; border-bottom: 2px solid var(--border-subtle); }
+    .brand { display: flex; align-items: center; gap: 10px; font-size: 1.25rem; font-weight: 800; color: var(--text-primary); }
+    .brand-dot { width: 12px; height: 12px; background: var(--accent-indigo); border-radius: 50%; box-shadow: 0 0 10px rgba(79, 70, 229, 0.4); }
+    .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; background: var(--status-green-bg); color: var(--status-green); border: 1px solid #a7f3d0; }
+    .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .metric-card { background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
+    .metric-label { font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.6px; }
+    .metric-value { font-size: 2rem; font-weight: 800; margin-top: 4px; color: var(--text-primary); }
+    .metric-unit { font-size: 0.95rem; color: var(--text-muted); font-weight: 500; margin-left: 2px; }
+    .metric-sub { font-size: 0.72rem; color: var(--accent-teal); font-weight: 600; margin-top: 2px; }
+    .main-grid { display: grid; grid-template-columns: 360px 1fr; gap: 16px; flex: 1; }
+    .sidebar-col { display: flex; flex-direction: column; gap: 16px; }
+    .card { background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; }
+    .health-section { align-items: center; text-align: center; position: relative; }
+    .health-gauge { position: relative; width: 160px; height: 160px; border-radius: 50%; background: conic-gradient(#cbd5e1 360deg, #e2e8f0 0deg); display: flex; align-items: center; justify-content: center; margin: 10px 0; transition: background 0.5s ease; }
+    .health-gauge::before { content: ''; position: absolute; width: 130px; height: 130px; border-radius: 50%; background: var(--card-bg); }
+    @keyframes pulseFade { 0% { opacity: 0.35; transform: scale(0.98); } 50% { opacity: 0.85; transform: scale(1.02); } 100% { opacity: 0.35; transform: scale(0.98); } }
+    .health-gauge.sampling { animation: pulseFade 1.8s infinite ease-in-out; }
+    .health-number { position: relative; font-size: 2.2rem; font-weight: 800; color: var(--text-primary); }
+    .health-status-text { font-size: 0.88rem; font-weight: 800; letter-spacing: 0.5px; }
+    .timer-badge { background: #f1f5f9; border: 1px solid var(--border-subtle); border-radius: 20px; padding: 4px 12px; font-size: 0.72rem; font-weight: 800; color: var(--accent-indigo); margin-bottom: 6px; }
+    .btn-start-test { background: var(--status-green); color: #fff; border: none; padding: 11px 16px; border-radius: 6px; font-size: 0.84rem; font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3); transition: all 0.2s ease; }
+    .btn-start-test:hover { background: #059669; }
+    .btn-start-test.running { background: var(--accent-amber); cursor: not-allowed; box-shadow: none; }
+    .ai-insight-box { background: #e0e7ff; border: 1px solid #c7d2fe; border-radius: 8px; padding: 10px 12px; width: 100%; text-align: left; font-size: 0.78rem; line-height: 1.4; margin-top: 10px; color: #3730a3; font-weight: 500; }
+    .ai-insight-title { color: var(--accent-indigo); font-weight: 800; text-transform: uppercase; font-size: 0.68rem; margin-bottom: 2px; letter-spacing: 0.6px; }
+    .info-panel { display: flex; flex-direction: column; gap: 10px; }
+    .info-title { font-size: 0.74rem; font-weight: 800; text-transform: uppercase; color: var(--accent-indigo); letter-spacing: 0.5px; }
+    .analysis-row { display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 600; color: var(--text-muted); padding-bottom: 4px; border-bottom: 1px dashed #e2e8f0; }
+    .analysis-value { font-weight: 800; color: var(--text-primary); }
+    .charts-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 16px; }
+    .chart-card { min-height: 220px; }
+    .chart-header { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
+    .chart-wrapper { position: relative; width: 100%; flex: 1; min-height: 160px; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="brand">
+      <div class="brand-dot"></div>
+      VoltTrace <span style="font-weight:500; font-size:0.9rem; color:var(--text-muted);">| Universal Smart Plug Health Diagnostics</span>
+    </div>
+    <div id="status-badge" class="status-badge">CONNECTED</div>
+  </header>
+
+  <div class="metrics-row">
+    <div class="metric-card">
+      <div class="metric-label">RMS Voltage</div>
+      <div class="metric-value"><span id="v_rms">0.0</span><span class="metric-unit">V</span></div>
+      <div class="metric-sub" id="v_norm_disp">0.0 p.u.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">RMS Current</div>
+      <div class="metric-value"><span id="i_rms">0.000</span><span class="metric-unit">A</span></div>
+      <div class="metric-sub" id="i_norm_disp">0.0 p.u.</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Active Power</div>
+      <div class="metric-value"><span id="power">0.0</span><span class="metric-unit">W</span></div>
+      <div class="metric-sub" id="pf_disp">PF: 1.0</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Core Temperature</div>
+      <div class="metric-value"><span id="temp">28.5</span><span class="metric-unit">°C</span></div>
+      <div class="metric-sub">Thermal Baseline OK</div>
+    </div>
+  </div>
+
+  <div class="main-grid">
+    <div class="sidebar-col">
+      <div class="card health-section">
+        <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Universal Health Monitor</div>
+        <div class="timer-badge" id="timer-badge">TEST READY (30s DUAL-PHASE)</div>
+        <div class="health-gauge" id="health-circle">
+          <div class="health-number" id="health-val">--%</div>
+        </div>
+        <div class="health-status-text" id="health-status">INITIALIZATION NEEDED</div>
+        <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;" id="timestamp-val">Last Update: --:--:--</div>
+        <button id="btn-start" class="btn-start-test" onclick="startDualPhaseTest()">Start Diagnostic Test</button>
+        <div class="ai-insight-box">
+          <div class="ai-insight-title">AI Engine Status</div>
+          <div id="ai-insight">Click 'Start Diagnostic Test' to begin 5s load fingerprinting + 25s evaluation...</div>
+        </div>
+      </div>
+
+      <div class="card info-panel">
+        <div class="info-title">Autonomous NILM Fingerprint</div>
+        <div class="analysis-row">
+          <span>Identified Appliance:</span>
+          <span class="analysis-value" id="detected_appliance" style="color:var(--accent-indigo);">Detecting...</span>
+        </div>
+        <div class="analysis-row">
+          <span>Load Category:</span>
+          <span class="analysis-value" id="detected_type" style="color:var(--accent-teal);">--</span>
+        </div>
+        <div class="analysis-row">
+          <span>Apparent Power (S):</span>
+          <span class="analysis-value" id="va_disp">0.0 VA</span>
+        </div>
+        <div class="analysis-row">
+          <span>Reactive Power (Q):</span>
+          <span class="analysis-value" id="var_disp">0.0 VAR</span>
+        </div>
+        <div class="analysis-row" style="border:none;">
+          <span>Crest Factor (I_peak / I_rms):</span>
+          <span class="analysis-value" id="crest_disp">1.41</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="charts-grid-2x2">
+      <div class="card chart-card">
+        <div class="chart-header">Voltage Stream (V)</div>
+        <div class="chart-wrapper"><canvas id="chartVoltage"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="chart-header">Current Stream (A)</div>
+        <div class="chart-wrapper"><canvas id="chartCurrent"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="chart-header">Active Power Dynamics (W)</div>
+        <div class="chart-wrapper"><canvas id="chartPower"></canvas></div>
+      </div>
+      <div class="card chart-card">
+        <div class="chart-header">Temperature Stream (°C)</div>
+        <div class="chart-wrapper"><canvas id="chartTemp"></canvas></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Automatically resolves host origin and port (e.g. http://192.168.29.98:7000)
+    const BASE_URL = window.location.origin;
+    const API_URL = `${BASE_URL}/api/telemetry`;
+
+    const maxPoints = 20;
+    const labels = [];
+    const voltageData = [];
+    const currentData = [];
+    const powerData = [];
+    const tempData = [];
+
+    let testState = 'IDLE';
+    let totalCountdown = 30;
+    let timerInterval = null;
+    let lockedHealth = null;
+    let lockedInsight = "";
+    let lockedClass = "";
+
+    async function startDualPhaseTest() {
+      if (testState === 'FINGERPRINTING' || testState === 'EVALUATING') return;
+
+      testState = 'FINGERPRINTING';
+      totalCountdown = 30;
+      lockedHealth = null;
+      lockedInsight = "";
+      lockedClass = "";
+
+      try {
+        await fetch(`${BASE_URL}/api/reset-fingerprint`, { method: 'POST' });
+      } catch (err) {
+        console.error("Reset fingerprint error:", err);
+      }
+
+      const btn = document.getElementById('btn-start');
+      const gauge = document.getElementById('health-circle');
+      btn.classList.add('running');
+      btn.innerText = "Analyzing Load Characteristics...";
+      gauge.classList.add('sampling');
+
+      if (timerInterval) clearInterval(timerInterval);
+
+      timerInterval = setInterval(async () => {
+        totalCountdown--;
+
+        if (totalCountdown === 25) {
+          try {
+            await fetch(`${BASE_URL}/api/lock-fingerprint`, { method: 'POST' });
+          } catch (err) {
+            console.error("Lock fingerprint error:", err);
+          }
+        }
+
+        if (totalCountdown > 25) {
+          let fpSec = 30 - totalCountdown;
+          document.getElementById('timer-badge').innerText = `PHASE 1: NILM FINGERPRINTING (${5 - fpSec}s)`;
+        } else if (totalCountdown > 0) {
+          testState = 'EVALUATING';
+          btn.innerText = "Evaluating Signal Health...";
+          document.getElementById('timer-badge').innerText = `PHASE 2: HEALTH EVALUATION (${totalCountdown}s)`;
+        } else {
+          clearInterval(timerInterval);
+          completeTest();
+        }
+      }, 1000);
+    }
+
+    function completeTest() {
+      testState = 'COMPLETED';
+      const btn = document.getElementById('btn-start');
+      const gauge = document.getElementById('health-circle');
+
+      btn.classList.remove('running');
+      btn.innerText = "Run New Diagnostic Test";
+      gauge.classList.remove('sampling');
+
+      document.getElementById('timer-badge').innerText = "DIAGNOSTIC LOCKED (30s RECORD)";
+    }
+
+    const chartOptions = {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: false,
+      scales: {
+        x: { grid: { color: '#e2e8f0' }, ticks: { color: '#64748b', font: { size: 9, weight: '600' } } },
+        y: { grid: { color: '#e2e8f0' }, ticks: { color: '#64748b', font: { size: 9, weight: '600' } } }
+      },
+      plugins: { legend: { display: false } }
+    };
+
+    const chartVoltage = new Chart(document.getElementById('chartVoltage').getContext('2d'), {
+      type: 'line',
+      data: { labels: labels, datasets: [{ data: voltageData, borderColor: '#4f46e5', borderWidth: 2, backgroundColor: 'rgba(79, 70, 229, 0.08)', fill: true, tension: 0.2 }] },
+      options: chartOptions
+    });
+
+    const chartCurrent = new Chart(document.getElementById('chartCurrent').getContext('2d'), {
+      type: 'line',
+      data: { labels: labels, datasets: [{ data: currentData, borderColor: '#0d9488', borderWidth: 2, backgroundColor: 'rgba(13, 148, 136, 0.08)', fill: true, tension: 0.2 }] },
+      options: chartOptions
+    });
+
+    const chartPower = new Chart(document.getElementById('chartPower').getContext('2d'), {
+      type: 'line',
+      data: { labels: labels, datasets: [{ data: powerData, borderColor: '#0284c7', borderWidth: 2, backgroundColor: 'rgba(2, 132, 199, 0.08)', fill: true, tension: 0.2 }] },
+      options: chartOptions
+    });
+
+    const chartTemp = new Chart(document.getElementById('chartTemp').getContext('2d'), {
+      type: 'line',
+      data: { labels: labels, datasets: [{ data: tempData, borderColor: '#d97706', borderWidth: 2, backgroundColor: 'rgba(217, 119, 6, 0.08)', fill: true, tension: 0.2 }] },
+      options: chartOptions
+    });
+
+    async function updateDashboard() {
+      try {
+        const res = await fetch(API_URL);
+        const data = await res.json();
+
+        let v_rms = Number(data.v_rms) || 0.0;
+        let i_rms = Number(data.i_rms) || 0.0;
+        let power = Number(data.power) || 0.0;
+        let temp = Number(data.temp) || 28.5;
+        let liveHealth = Number(data.health_score) !== undefined ? Number(data.health_score) : 100.0;
+
+        let v_norm = data.v_norm !== undefined ? data.v_norm : 0.0;
+        let i_norm = data.i_norm !== undefined ? data.i_norm : 0.0;
+        let pf = data.power_factor !== undefined ? data.power_factor : 1.0;
+        let cf = data.crest_factor !== undefined ? data.crest_factor : 1.41;
+
+        let va = (v_rms * i_rms).toFixed(1);
+        let pf_clamped = Math.min(1.0, Math.max(0.0, pf));
+        let var_val = (v_rms * i_rms * Math.sin(Math.acos(pf_clamped))).toFixed(1);
+
+        document.getElementById('v_rms').innerText = v_rms.toFixed(1);
+        document.getElementById('i_rms').innerText = i_rms.toFixed(3);
+        document.getElementById('power').innerText = power.toFixed(1);
+        document.getElementById('temp').innerText = temp.toFixed(1);
+
+        document.getElementById('v_norm_disp').innerText = `${v_norm} p.u.`;
+        document.getElementById('i_norm_disp').innerText = `${i_norm} p.u.`;
+        document.getElementById('pf_disp').innerText = `PF: ${pf}`;
+
+        document.getElementById('va_disp').innerText = `${va} VA`;
+        document.getElementById('var_disp').innerText = `${var_val} VAR`;
+        document.getElementById('crest_disp').innerText = cf.toFixed(2);
+        document.getElementById('detected_appliance').innerText = data.detected_appliance || "Detecting...";
+        document.getElementById('detected_type').innerText = data.detected_type || "--";
+        document.getElementById('timestamp-val').innerText = `Last Update: ${data.timestamp || new Date().toLocaleTimeString()}`;
+
+        let currentAiText = "";
+        if (data.classification === "NO LOAD DETECTED") {
+          currentAiText = "Open Circuit / Idle Socket: No active current draw detected.";
+        } else if (liveHealth >= 80) {
+          currentAiText = `Nominal operation (${v_norm} p.u. V, ${i_norm} p.u. I). High operating fidelity verified.`;
+        } else if (liveHealth >= 50) {
+          currentAiText = `WARNING: Telemetry deviating from operational baseline (${v_norm} p.u. V, ${i_norm} p.u. I).`;
+        } else {
+          currentAiText = `CRITICAL FAULT: Significant anomaly detected (${v_norm} p.u. V, ${i_norm} p.u. I). Check circuit.`;
+        }
+
+        const healthValElem = document.getElementById('health-val');
+        const healthCircle = document.getElementById('health-circle');
+        const healthStatus = document.getElementById('health-status');
+        const aiInsightBox = document.getElementById('ai-insight');
+
+        if (testState === 'IDLE') {
+          healthValElem.innerText = "--%";
+          healthStatus.innerText = "TEST NOT INITIALIZED";
+          healthStatus.style.color = "var(--text-muted)";
+          healthCircle.style.background = `conic-gradient(#cbd5e1 360deg, #e2e8f0 0deg)`;
+          aiInsightBox.innerText = "Click 'Start Diagnostic Test' to begin 5s load fingerprinting + 25s evaluation...";
+        } else if (testState === 'FINGERPRINTING') {
+          healthValElem.innerText = "--%";
+          healthStatus.innerText = `IDENTIFYING LOAD (${30 - totalCountdown}s)`;
+          healthStatus.style.color = "var(--accent-indigo)";
+          aiInsightBox.innerText = `[Phase 1] Extracting phase angle and Crest Factor (${cf.toFixed(2)}) to lock baseline...`;
+        } else if (testState === 'EVALUATING') {
+          lockedHealth = liveHealth;
+          lockedInsight = currentAiText;
+          lockedClass = data.classification;
+
+          if (data.classification === "NO LOAD DETECTED") {
+            healthValElem.innerText = "0%";
+            healthStatus.innerText = "NO LOAD DETECTED";
+            healthStatus.style.color = "var(--status-yellow)";
+            healthCircle.style.background = `conic-gradient(var(--status-yellow) 360deg, #e2e8f0 0deg)`;
+            aiInsightBox.innerText = `[Phase 2] ${currentAiText}`;
+          } else {
+            healthValElem.innerText = `${Math.round(liveHealth)}%`;
+            const degrees = (liveHealth / 100) * 360;
+            let statusColor = liveHealth < 50 ? "var(--status-red)" : (liveHealth < 80 ? "var(--status-yellow)" : "var(--status-green)");
+
+            healthCircle.style.background = `conic-gradient(${statusColor} ${degrees}deg, #e2e8f0 0deg)`;
+            healthStatus.innerText = `EVALUATING... (${totalCountdown}s)`;
+            healthStatus.style.color = statusColor;
+            aiInsightBox.innerText = `[Phase 2] Analyzing signals: ${currentAiText}`;
+          }
+        } else if (testState === 'COMPLETED') {
+          let displayScore = lockedHealth !== null ? lockedHealth : liveHealth;
+          let displayAiText = lockedInsight !== "" ? lockedInsight : currentAiText;
+          let displayClass = lockedClass !== "" ? lockedClass : data.classification;
+
+          if (displayClass === "NO LOAD DETECTED") {
+            healthValElem.innerText = "0%";
+            healthStatus.innerText = "NO LOAD DETECTED";
+            healthStatus.style.color = "var(--status-yellow)";
+            healthCircle.style.background = `conic-gradient(var(--status-yellow) 360deg, #e2e8f0 0deg)`;
+            aiInsightBox.innerText = `[30s Verified Record] ${displayAiText}`;
+          } else {
+            healthValElem.innerText = `${Math.round(displayScore)}%`;
+            const degrees = (displayScore / 100) * 360;
+
+            let statusColor = "var(--status-green)";
+            let statusText = "OPTIMAL HEALTH";
+
+            if (displayScore < 50) {
+              statusColor = "var(--status-red)";
+              statusText = "CRITICAL FAULT";
+            } else if (displayScore < 80) {
+              statusColor = "var(--status-yellow)";
+              statusText = "DEGRADED STATE";
+            }
+
+            healthCircle.style.background = `conic-gradient(${statusColor} ${degrees}deg, #e2e8f0 0deg)`;
+            healthStatus.innerText = statusText;
+            healthStatus.style.color = statusColor;
+            aiInsightBox.innerText = `[30s Verified Record] ${displayAiText}`;
+          }
+        }
+
+        const statusBadge = document.getElementById('status-badge');
+        statusBadge.innerText = data.status;
+        if (data.status === "Connected") {
+          statusBadge.style.color = "var(--status-green)";
+          statusBadge.style.background = "var(--status-green-bg)";
+          statusBadge.style.borderColor = "#a7f3d0";
+        } else {
+          statusBadge.style.color = "var(--status-red)";
+          statusBadge.style.background = "var(--status-red-bg)";
+          statusBadge.style.borderColor = "#fca5a5";
+        }
+
+        const timeStr = data.timestamp || new Date().toLocaleTimeString();
+        if (labels.length >= maxPoints) {
+          labels.shift();
+          voltageData.shift();
+          currentData.shift();
+          powerData.shift();
+          tempData.shift();
+        }
+
+        labels.push(timeStr);
+        voltageData.push(v_rms);
+        currentData.push(i_rms);
+        powerData.push(power);
+        tempData.push(temp);
+
+        chartVoltage.update();
+        chartCurrent.update();
+        chartPower.update();
+        chartTemp.update();
+
+      } catch (err) {
+        const statusBadge = document.getElementById('status-badge');
+        statusBadge.innerText = "DISCONNECTED";
+        statusBadge.style.color = "var(--status-red)";
+        statusBadge.style.background = "var(--status-red-bg)";
+        statusBadge.style.borderColor = "#fca5a5";
+      }
+    }
+
+    setInterval(updateDashboard, 1000);
+    updateDashboard();
+  </script>
+</body>
+</html>
