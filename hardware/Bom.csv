@@ -1,9 +1,14 @@
-Component Description,Specification,Designator,Quantity,Estimated Cost (INR),Function
-Edge AI Processing Board,Arduino UNO Q,U1,1,6749,DSP Sampling and Physical AI Inference
-AC Precision Voltage Sensor,ZMPT101B Active Transformer Module,U2,1,250,Isolated AC Voltage Waveform Sensing
-AC Current Sensor (0-30A),SCT-013-000 Non-Invasive Split-Core CT,U3,1,450,Isolated AC Load Current Sensing
-Actuator Control / Relay,5V Fast-Switching Relay / SSR (16A 250VAC),RL1,1,120,Autonomous Safety Load Cut-off
-Status Indicators (Green/Red),3mm/5mm Through-Hole LEDs,D1-D2,2,10,Real-time System & Fault Status Indication
-Analog Conditioning & Bias,10k Resistors & 100nF/10uF Capacitors,R1-R4/C1-C2,6,30,Analog Filtering and DC Midpoint Bias
-Prototyping Testbed & Interconnects,Breadboard & Dupont Jumper Wires,TB1,1,180,Benchtop Prototyping and Signal Routing
-Isolated DC Power Supply,5V 2A Regulated Power Supply,PS1,1,200,Clean Low-Noise DC Power Source
+# VoltTrace | Bill of Materials (BOM)
+
+| Component Description | Component/Part Model | Quantity | Designator | Specification / Rating |
+| :--- | :--- | :--- | :--- | :--- |
+| **Microcontroller Board** | Arduino UNO Q | 1 | MCU1 | Dual-Core (MCU + Linux MPU), 5V/3.3V Logic |
+| **AC Voltage Sensor** | ZMPT101B Module | 1 | VS1 | Single-Phase AC Voltage Sensor Module ($0-250\text{V}$) |
+| **Current Transformer** | SCT-013-000 | 1 | CS1 | Non-Invasive AC Current Sensor ($0-30\text{A} / 0-100\text{A}$) |
+| **Relay Module** | 5V Single-Channel Relay | 1 | RL1 | 5V DC Trigger, 250V AC / 10A Contacts (NO/NC) |
+| **AC-DC Power Supply** | Hi-Link HLK-PM01 | 1 | PS1 | 220V AC to 5V DC Buck Step-Down Module (5W) |
+| **AC Socket & Plug** | Universal 3-Pin Socket | 1 | SKT1 | 16A / 250V AC Panel Mount Socket |
+| **Signal Resistors** | Metal Film Resistors | 2 | R1, R2 | $10\text{k}\Omega, 1/4\text{W}, 1\%$ Tolerance |
+| **Burden Resistor** | Precision Resistor | 1 | Rb | $33\Omega, 1/2\text{W}, 1\%$ (CT Calibration) |
+| **DC Bias Capacitor** | Electrolytic Capacitor | 1 | C1 | $10\mu\text{F}, 25\text{V}$ (Mid-Rail Decoupling) |
+| **Terminal Blocks** | Screw Terminal Blocks | 2 | TB1, TB2 | 2-Pin 5.08mm Pitch AC Mains Terminals |
