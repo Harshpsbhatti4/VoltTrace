@@ -1,0 +1,17 @@
+# VoltTrace | Dual-Core System Architecture
+
+VoltTrace harnesses the heterogeneous dual-core architecture of the **Arduino UNO Q** to divide high-speed signal sampling and heavy machine learning execution.
+
+---
+
+## 1. Dual-Core Functional Split
+
+```text
++------------------------------------+        +-----------------------------------+
+|       MCU Core (C++ / Zephyr)      |        |        MPU Core (Python 3)        |
+|                                    |        |                                   |
+| - High-Speed A1/A2 Sampling        |  IPC   | - Random Forest NILM Classifier   |
+| - Zero-Bias & RMS Calculations     | -----> | - Autoencoder Anomaly Scoring     |
+| - Peak & Crest Factor Extraction   | Bridge | - Dynamic Health Score Calculation|
+| - Pin D7 Hardware Trip Actuation   |        | - Local FastAPI Web Server (:7000)|
++------------------------------------+        +-----------------------------------+
