@@ -1,1 +1,13 @@
-default_fqbn: arduino:zephyr:uno_q
+profiles:
+  default:
+    fqbn: 
+    platforms:
+      - platform: arduino:zephyr
+    libraries:
+      - dependency: ArxContainer (0.7.0)
+      - dependency: ArxTypeTraits (0.3.2)
+      - dependency: DebugLog (0.8.4)
+      - MsgPack (0.4.2)
+      - generic-Arduino (0.1.1)
+
+default_profile: default
