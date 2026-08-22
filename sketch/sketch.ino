@@ -1,11 +1,12 @@
 #include <Arduino.h>
 #include <Arduino_RouterBridge.h>
 
-const uint8_t PIN_VOLTAGE = A2;  
-const uint8_t PIN_CURRENT = A1;  
-const uint8_t PIN_RELAY   = 7;   
+const uint8_t PIN_VOLTAGE = A2;  // Pin A2
+const uint8_t PIN_CURRENT = A1;  // Pin A1
+const uint8_t PIN_RELAY   = 7;   // Pin D7 Relay
 
-float V_CALIBRATION = 122.60f; 
+// Calibrated multiplier to scale ~212V raw up to standard ~230V RMS
+float V_CALIBRATION = 103.50f;
 float I_CALIBRATION = 0.0488f;  
 
 const int TOTAL_SAMPLES = 192;   
@@ -13,6 +14,7 @@ const unsigned long TELEMETRY_INTERVAL_MS = 250;
 unsigned long lastTelemetryTime = 0;
 
 void setup() {
+    // Initialize App Lab Serial Monitor and Router Bridge IPC
     Monitor.begin();
     Bridge.begin();
 
@@ -21,7 +23,7 @@ void setup() {
     #endif
 
     pinMode(PIN_RELAY, OUTPUT);
-    digitalWrite(PIN_RELAY, HIGH); 
+    digitalWrite(PIN_RELAY, HIGH); // Relay ON (Default Closed)
 
     Monitor.println("VoltTrace Engine Calibrated & Initialized...");
 }
@@ -41,6 +43,7 @@ void loop() {
         int i_samples[TOTAL_SAMPLES];
 
         for (int k = 0; k < TOTAL_SAMPLES; k++) {
+            // MUX settling between channel toggles
             analogRead(PIN_VOLTAGE);
             delayMicroseconds(15);
             int raw_v = analogRead(PIN_VOLTAGE);
@@ -91,11 +94,13 @@ void loop() {
         float i_rms = sqrtf(sum_i_sq / TOTAL_SAMPLES);
         float p_act = fabsf(sum_p / TOTAL_SAMPLES);
 
+        // Clamp OFF voltage dips
         if (v_rms < 140.0f || v_pp < 5) {
             v_rms = 0.0f;
             p_act = 0.0f;
         }
 
+        // Refined Noise Gate for Idle / Open Socket (Clamping ambient 0.197A noise)
         if (i_rms < 0.22f || i_pp < 4 || v_rms == 0.0f) {
             i_rms = 0.0f;
             p_act = 0.0f;
@@ -107,6 +112,7 @@ void loop() {
         float crest_factor = (i_rms > 0.05f) ? constrain(max_abs_i / i_rms, 1.0f, 4.5f) : 1.414f;
         float temperature = 28.5f + (i_rms * 1.5f);
 
+        // Stream logs to App Lab Serial Monitor
         Monitor.print("V_RMS: ");
         Monitor.print(v_rms, 1);
         Monitor.print(" V | I_RMS: ");
@@ -115,6 +121,7 @@ void loop() {
         Monitor.print(p_act, 1);
         Monitor.println(" W");
 
+        // Notify Python Backend via RouterBridge RPC
         Bridge.notify("record_telemetry", v_rms, i_rms, p_act, pf, crest_factor, temperature);
     }
 }
