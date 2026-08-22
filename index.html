@@ -19,7 +19,7 @@
     .brand { display: flex; align-items: center; gap: 10px; font-size: 1.25rem; font-weight: 800; color: var(--text-primary); }
     .brand-dot { width: 12px; height: 12px; background: var(--accent-indigo); border-radius: 50%; box-shadow: 0 0 10px rgba(79, 70, 229, 0.4); }
     .status-badge { padding: 6px 14px; border-radius: 20px; font-size: 0.8rem; font-weight: 700; background: var(--status-green-bg); color: var(--status-green); border: 1px solid #a7f3d0; }
-    .metrics-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .metrics-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
     .metric-card { background: var(--card-bg); border: 1px solid var(--border-subtle); border-radius: 12px; padding: 16px 20px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05); }
     .metric-label { font-size: 0.72rem; text-transform: uppercase; color: var(--text-muted); font-weight: 700; letter-spacing: 0.6px; }
     .metric-value { font-size: 2rem; font-weight: 800; margin-top: 4px; color: var(--text-primary); }
@@ -33,7 +33,7 @@
     .health-gauge::before { content: ''; position: absolute; width: 130px; height: 130px; border-radius: 50%; background: var(--card-bg); }
     @keyframes pulseFade { 0% { opacity: 0.35; transform: scale(0.98); } 50% { opacity: 0.85; transform: scale(1.02); } 100% { opacity: 0.35; transform: scale(0.98); } }
     .health-gauge.sampling { animation: pulseFade 1.8s infinite ease-in-out; }
-    .health-number { position: relative; font-size: 2.2rem; font-weight: 800; color: var(--text-primary); }
+    .health-number { position: relative; font-size: 1.8rem; font-weight: 800; color: var(--text-primary); text-align: center; }
     .health-status-text { font-size: 0.88rem; font-weight: 800; letter-spacing: 0.5px; }
     .timer-badge { background: #f1f5f9; border: 1px solid var(--border-subtle); border-radius: 20px; padding: 4px 12px; font-size: 0.72rem; font-weight: 800; color: var(--accent-indigo); margin-bottom: 6px; }
     .btn-start-test { background: var(--status-green); color: #fff; border: none; padding: 11px 16px; border-radius: 6px; font-size: 0.84rem; font-weight: 800; cursor: pointer; width: 100%; margin-top: 10px; box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3); transition: all 0.2s ease; }
@@ -45,8 +45,9 @@
     .info-title { font-size: 0.74rem; font-weight: 800; text-transform: uppercase; color: var(--accent-indigo); letter-spacing: 0.5px; }
     .analysis-row { display: flex; justify-content: space-between; font-size: 0.76rem; font-weight: 600; color: var(--text-muted); padding-bottom: 4px; border-bottom: 1px dashed #e2e8f0; }
     .analysis-value { font-weight: 800; color: var(--text-primary); }
-    .charts-grid-2x2 { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 16px; }
+    .charts-grid-custom { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: auto auto; gap: 16px; }
     .chart-card { min-height: 220px; }
+    .chart-card.full-width { grid-column: 1 / -1; }
     .chart-header { font-size: 0.78rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); margin-bottom: 6px; letter-spacing: 0.5px; }
     .chart-wrapper { position: relative; width: 100%; flex: 1; min-height: 160px; }
   </style>
@@ -65,7 +66,7 @@
     <div class="metric-card">
       <div class="metric-label">RMS Voltage</div>
       <div class="metric-value"><span id="v_rms">0.0</span><span class="metric-unit">V</span></div>
-      <div class="metric-sub" id="v_norm_disp">0.0 p.u.</div>
+      <div class="metric-sub" id="v_norm_disp">0.00 p.u.</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">RMS Current</div>
@@ -77,11 +78,6 @@
       <div class="metric-value"><span id="power">0.0</span><span class="metric-unit">W</span></div>
       <div class="metric-sub" id="pf_disp">PF: 1.0</div>
     </div>
-    <div class="metric-card">
-      <div class="metric-label">Core Temperature</div>
-      <div class="metric-value"><span id="temp">28.5</span><span class="metric-unit">°C</span></div>
-      <div class="metric-sub">Thermal Baseline OK</div>
-    </div>
   </div>
 
   <div class="main-grid">
@@ -90,14 +86,14 @@
         <div style="font-size: 0.75rem; font-weight: 800; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.5px;">Universal Health Monitor</div>
         <div class="timer-badge" id="timer-badge">TEST READY (30s DUAL-PHASE)</div>
         <div class="health-gauge" id="health-circle">
-          <div class="health-number" id="health-val">--%</div>
+          <div class="health-number" id="health-val">NO LOAD</div>
         </div>
-        <div class="health-status-text" id="health-status">INITIALIZATION NEEDED</div>
+        <div class="health-status-text" id="health-status">NO LOAD DETECTED</div>
         <div style="font-size: 0.7rem; color: var(--text-muted); font-weight: 500;" id="timestamp-val">Last Update: --:--:--</div>
         <button id="btn-start" class="btn-start-test" onclick="startDualPhaseTest()">Start Diagnostic Test</button>
         <div class="ai-insight-box">
           <div class="ai-insight-title">AI Engine Status</div>
-          <div id="ai-insight">Click 'Start Diagnostic Test' to begin 5s load fingerprinting + 25s evaluation...</div>
+          <div id="ai-insight">Open Circuit / Idle Socket: Connect load and click 'Start Diagnostic Test'.</div>
         </div>
       </div>
 
@@ -105,11 +101,11 @@
         <div class="info-title">Autonomous NILM Fingerprint</div>
         <div class="analysis-row">
           <span>Identified Appliance:</span>
-          <span class="analysis-value" id="detected_appliance" style="color:var(--accent-indigo);">Detecting...</span>
+          <span class="analysis-value" id="detected_appliance" style="color:var(--accent-indigo);">No Load Connected</span>
         </div>
         <div class="analysis-row">
           <span>Load Category:</span>
-          <span class="analysis-value" id="detected_type" style="color:var(--accent-teal);">--</span>
+          <span class="analysis-value" id="detected_type" style="color:var(--accent-teal);">Open Circuit</span>
         </div>
         <div class="analysis-row">
           <span>Apparent Power (S):</span>
@@ -126,7 +122,7 @@
       </div>
     </div>
 
-    <div class="charts-grid-2x2">
+    <div class="charts-grid-custom">
       <div class="card chart-card">
         <div class="chart-header">Voltage Stream (V)</div>
         <div class="chart-wrapper"><canvas id="chartVoltage"></canvas></div>
@@ -135,19 +131,14 @@
         <div class="chart-header">Current Stream (A)</div>
         <div class="chart-wrapper"><canvas id="chartCurrent"></canvas></div>
       </div>
-      <div class="card chart-card">
+      <div class="card chart-card full-width">
         <div class="chart-header">Active Power Dynamics (W)</div>
         <div class="chart-wrapper"><canvas id="chartPower"></canvas></div>
-      </div>
-      <div class="card chart-card">
-        <div class="chart-header">Temperature Stream (°C)</div>
-        <div class="chart-wrapper"><canvas id="chartTemp"></canvas></div>
       </div>
     </div>
   </div>
 
   <script>
-    // Automatically resolves host origin and port (e.g. http://192.168.29.98:7000)
     const BASE_URL = window.location.origin;
     const API_URL = `${BASE_URL}/api/telemetry`;
 
@@ -156,7 +147,6 @@
     const voltageData = [];
     const currentData = [];
     const powerData = [];
-    const tempData = [];
 
     let testState = 'IDLE';
     let totalCountdown = 30;
@@ -254,12 +244,6 @@
       options: chartOptions
     });
 
-    const chartTemp = new Chart(document.getElementById('chartTemp').getContext('2d'), {
-      type: 'line',
-      data: { labels: labels, datasets: [{ data: tempData, borderColor: '#d97706', borderWidth: 2, backgroundColor: 'rgba(217, 119, 6, 0.08)', fill: true, tension: 0.2 }] },
-      options: chartOptions
-    });
-
     async function updateDashboard() {
       try {
         const res = await fetch(API_URL);
@@ -268,7 +252,6 @@
         let v_rms = Number(data.v_rms) || 0.0;
         let i_rms = Number(data.i_rms) || 0.0;
         let power = Number(data.power) || 0.0;
-        let temp = Number(data.temp) || 28.5;
         let liveHealth = Number(data.health_score) !== undefined ? Number(data.health_score) : 100.0;
 
         let v_norm = data.v_norm !== undefined ? data.v_norm : 0.0;
@@ -283,7 +266,6 @@
         document.getElementById('v_rms').innerText = v_rms.toFixed(1);
         document.getElementById('i_rms').innerText = i_rms.toFixed(3);
         document.getElementById('power').innerText = power.toFixed(1);
-        document.getElementById('temp').innerText = temp.toFixed(1);
 
         document.getElementById('v_norm_disp').innerText = `${v_norm} p.u.`;
         document.getElementById('i_norm_disp').innerText = `${i_norm} p.u.`;
@@ -292,12 +274,12 @@
         document.getElementById('va_disp').innerText = `${va} VA`;
         document.getElementById('var_disp').innerText = `${var_val} VAR`;
         document.getElementById('crest_disp').innerText = cf.toFixed(2);
-        document.getElementById('detected_appliance').innerText = data.detected_appliance || "Detecting...";
-        document.getElementById('detected_type').innerText = data.detected_type || "--";
+        document.getElementById('detected_appliance').innerText = data.detected_appliance || "No Load Connected";
+        document.getElementById('detected_type').innerText = data.detected_type || "Open Circuit";
         document.getElementById('timestamp-val').innerText = `Last Update: ${data.timestamp || new Date().toLocaleTimeString()}`;
 
         let currentAiText = "";
-        if (data.classification === "NO LOAD DETECTED") {
+        if (data.classification === "NO LOAD DETECTED" || i_rms < 0.012 || v_rms < 50.0) {
           currentAiText = "Open Circuit / Idle Socket: No active current draw detected.";
         } else if (liveHealth >= 80) {
           currentAiText = `Nominal operation (${v_norm} p.u. V, ${i_norm} p.u. I). High operating fidelity verified.`;
@@ -313,13 +295,21 @@
         const aiInsightBox = document.getElementById('ai-insight');
 
         if (testState === 'IDLE') {
-          healthValElem.innerText = "--%";
-          healthStatus.innerText = "TEST NOT INITIALIZED";
-          healthStatus.style.color = "var(--text-muted)";
-          healthCircle.style.background = `conic-gradient(#cbd5e1 360deg, #e2e8f0 0deg)`;
-          aiInsightBox.innerText = "Click 'Start Diagnostic Test' to begin 5s load fingerprinting + 25s evaluation...";
+          if (data.classification === "NO LOAD DETECTED" || i_rms < 0.012 || v_rms < 50.0) {
+            healthValElem.innerText = "NO LOAD";
+            healthStatus.innerText = "NO LOAD DETECTED";
+            healthStatus.style.color = "var(--status-yellow)";
+            healthCircle.style.background = `conic-gradient(var(--status-yellow) 360deg, #e2e8f0 0deg)`;
+            aiInsightBox.innerText = "Open Circuit / Idle Socket: Connect load and click 'Start Diagnostic Test'.";
+          } else {
+            healthValElem.innerText = "--";
+            healthStatus.innerText = "TEST NOT INITIALIZED";
+            healthStatus.style.color = "var(--text-muted)";
+            healthCircle.style.background = `conic-gradient(#cbd5e1 360deg, #e2e8f0 0deg)`;
+            aiInsightBox.innerText = "Click 'Start Diagnostic Test' to begin 5s load fingerprinting + 25s evaluation...";
+          }
         } else if (testState === 'FINGERPRINTING') {
-          healthValElem.innerText = "--%";
+          healthValElem.innerText = "--";
           healthStatus.innerText = `IDENTIFYING LOAD (${30 - totalCountdown}s)`;
           healthStatus.style.color = "var(--accent-indigo)";
           aiInsightBox.innerText = `[Phase 1] Extracting phase angle and Crest Factor (${cf.toFixed(2)}) to lock baseline...`;
@@ -328,8 +318,8 @@
           lockedInsight = currentAiText;
           lockedClass = data.classification;
 
-          if (data.classification === "NO LOAD DETECTED") {
-            healthValElem.innerText = "0%";
+          if (data.classification === "NO LOAD DETECTED" || i_rms < 0.012 || v_rms < 50.0) {
+            healthValElem.innerText = "NO LOAD";
             healthStatus.innerText = "NO LOAD DETECTED";
             healthStatus.style.color = "var(--status-yellow)";
             healthCircle.style.background = `conic-gradient(var(--status-yellow) 360deg, #e2e8f0 0deg)`;
@@ -349,8 +339,8 @@
           let displayAiText = lockedInsight !== "" ? lockedInsight : currentAiText;
           let displayClass = lockedClass !== "" ? lockedClass : data.classification;
 
-          if (displayClass === "NO LOAD DETECTED") {
-            healthValElem.innerText = "0%";
+          if (displayClass === "NO LOAD DETECTED" || i_rms < 0.012 || v_rms < 50.0) {
+            healthValElem.innerText = "NO LOAD";
             healthStatus.innerText = "NO LOAD DETECTED";
             healthStatus.style.color = "var(--status-yellow)";
             healthCircle.style.background = `conic-gradient(var(--status-yellow) 360deg, #e2e8f0 0deg)`;
@@ -395,19 +385,16 @@
           voltageData.shift();
           currentData.shift();
           powerData.shift();
-          tempData.shift();
         }
 
         labels.push(timeStr);
         voltageData.push(v_rms);
         currentData.push(i_rms);
         powerData.push(power);
-        tempData.push(temp);
 
         chartVoltage.update();
         chartCurrent.update();
         chartPower.update();
-        chartTemp.update();
 
       } catch (err) {
         const statusBadge = document.getElementById('status-badge');
