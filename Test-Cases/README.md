@@ -2,7 +2,7 @@
 
 **Project Title:** VoltTrace - Edge-Powered Physical AI Smart Plug  
 **Hardware Platform:** Dual-Core Arduino UNO Q (Microcontroller Unit + Linux Microprocessor Unit)  
-**Public Google Drive Demo Folder:** [(https://drive.google.com/drive/folders/1mKykndEL4rWojgVOP0nfab-3UPmW3atM?usp=sharing)]
+**Public Google Drive Demo Folder:** [https://drive.google.com/drive/folders/1mKykndEL4rWojgVOP0nfab-3UPmW3atM?usp=sharing]
 
 ---
 
