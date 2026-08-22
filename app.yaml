@@ -1,5 +1,6 @@
-name: VoltTrace
-version: 1.0.0
-description: Edge-AI Smart Plug Health Diagnostics using Arduino UNO Q
-entrypoint: python/main.py
-sketch: sketch/sketch.ino
+name: VoltTrace-V2
+description: Edge-AI Smart Plug Health Diagnostics
+ports:
+- 7000
+bricks: []
+icon: 😀
