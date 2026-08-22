@@ -1,0 +1,35 @@
+# VoltTrace Technical Documentation
+
+Welcome to the technical documentation directory for **VoltTrace: Edge-Powered Smart Plug Platform with Embedded Physical AI**.
+
+This folder contains detailed technical reference guides covering hardware interfaces, dual-core firmware architecture, machine learning model specifications, and API endpoints.
+
+---
+
+## Documentation Index
+
+1. **[Hardware & Circuit Schematic](./CIRCUIT_SCHEMATIC.md)**
+   * Pinout assignment matrix (`A1`, `A2`, `D7`).
+   * Analog Conditioning & ADC DC bias offset configuration.
+   * Galvanic isolation and hardware relay safety cut-off logic.
+
+2. **[Dual-Core System Architecture](./SYSTEM_ARCHITECTURE.md)**
+   * MCU (C++ / Zephyr) sampling routines at 192 samples/cycle.
+   * RouterBridge Inter-Process Communication (IPC) payload structure.
+   * Linux MPU (Python / Debian) telemetry loop and FastAPI server.
+
+3. **[Machine Learning & Diagnostics Pipeline](./ML_MODEL_PIPELINE.md)**
+   * Non-Intrusive Load Monitoring (NILM) feature extraction ($V_{RMS}, I_{RMS}, P, PF, CF$).
+   * Random Forest classification boundaries for Resistive, Inductive, and Non-Linear SMPS loads.
+   * Autoencoder Reconstruction Error (MSE) & Universal Health Scoring ($0\% - 100\%$).
+
+4. **[FastAPI Web Server & API Spec](./API_DOCUMENTATION.md)**
+   * Telemetry REST API schema (`/api/telemetry`).
+   * Fingerprint lock/unlock POST endpoint parameters.
+
+---
+
+## PDF Deliverables & Submission Assets
+
+* **`VoltTrace_Final_Project_Report.pdf`**: Complete competition submission report including test case results, circuit diagrams, and performance benchmarks.
+* **`VoltTrace_System_Presentation.pdf`**: Project presentation slide deck for evaluation judges.
