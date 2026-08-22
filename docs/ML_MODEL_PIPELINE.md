@@ -1,4 +1,3 @@
-```markdown
 # VoltTrace | Machine Learning & Diagnostic Pipeline
 
 The Linux MPU core executes a dual-stage machine learning engine combining **Non-Intrusive Load Monitoring (NILM)** classification with **Autoencoder-based Anomaly Detection**.
